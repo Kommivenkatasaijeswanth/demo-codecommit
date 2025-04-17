@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Launch EC2 instance with KeyPair and custom VPC Security Group
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The VPC to launch the instance in
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet to launch the EC2 instance in
+
+Resources:
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and Custom App access
+      VpcId: !Ref VpcId  # The VPC ID you specify when launching the stack
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          CidrIp: 0.0.0.0/0
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: jeswanth  # Ensure this key exists
+      ImageId: ami-0036eda2f632cc8fb  # Replace with your actual AMI ID
+      SecurityGroupIds:
+        - !Ref MySecurityGroup  # Reference the Security Group created above
+      SubnetId: !Ref SubnetId  # Ensure you specify a subnet in your VPC
+      Tags:
+        - Key: Name
+          Value: MyEC2Instance
